@@ -19,7 +19,7 @@ def generate_individual_accuracy_bar_chart(metrics, epoch_qtd, learning_rate):
     plt.ylabel("Acuracia")
     plt.title(f"Acuracia por Hold-out. Epochs = {epoch_qtd}, Learning Rate = {learning_rate}")
     plt.xticks(rotation=0)
-    plt.savefig(f"accuracy_bar_chart_ep_{epoch_qtd}_lr_{learning_rate}.png")
+    plt.savefig(f"accuracy_bar_charts/accuracy_bar_chart_ep_{epoch_qtd}_lr_{learning_rate}.png")
     plt.close()
 
     return { 'Combinacao': f'ep_{epoch_qtd}_lr_{learning_rate}', 'Acuracia': max_accuracy_value, 'epoch_qtd': epoch_qtd, 'learning_rate': learning_rate, 'Hold-out': max_accuracy_holdout }
@@ -87,6 +87,42 @@ def generate_weights_scatter_plot(metrics, epoch_qtd, learning_rate):
     plt.savefig(f"weights_scatter_plot_ep_{epoch_qtd}_lr_{learning_rate}.png")
     plt.close()
 
+def generate_class_separation_charts(csv_file, epoch_qtd, learning_rate):
+    data = pd.read_csv(csv_file, header=None)
+
+    data.columns = ['Comprimento da sepala', 'Largura da sepala', 'Real', 'Previsto']
+
+    real_class_1 = data[data['Real'] == 1]
+    real_class_minus_1 = data[data['Real'] == -1]
+    predicted_class_1 = data[data['Previsto'] == '1']
+    predicted_class_minus_1 = data[data['Previsto'] == '-1']
+
+    plt.figure(figsize=(12, 6))
+    
+    # Real
+    plt.subplot(1, 2, 1)
+    plt.scatter(real_class_1['Comprimento da sepala'], real_class_1['Largura da sepala'], color='blue', label='Setosa')
+    plt.scatter(real_class_minus_1['Comprimento da sepala'], real_class_minus_1['Largura da sepala'], color='red', label='Versicolor')
+    plt.title(f"Real. Epochs = {epoch_qtd}, Learning Rate = {learning_rate}")
+    plt.xlabel('Comprimento da sépala')
+    plt.ylabel('Largura da sépala')
+    plt.legend()
+
+    # Previsto
+    plt.subplot(1, 2, 2)
+    plt.scatter(predicted_class_1['Comprimento da sepala'], predicted_class_1['Largura da sepala'], color='blue', label='Setosa')
+    plt.scatter(predicted_class_minus_1['Comprimento da sepala'], predicted_class_minus_1['Largura da sepala'], color='red', label='Versicolor')
+    plt.title(f"Previsto. Epochs = {epoch_qtd}, Learning Rate = {learning_rate}")
+    plt.xlabel('Comprimento da sépala')
+    plt.ylabel('Largura da sépala')
+    plt.legend()
+
+    plt.tight_layout()
+
+    holdout_name = '10_90' if '10_90' in csv_file else '30_70' if '30_70' in csv_file else '50_50'
+    plt.savefig(f"class_separation_charts/class_separation_chart_ep_{epoch_qtd}_lr_{learning_rate}_{holdout_name}.png")
+    plt.close()
+
 def main():
     output_folder = '../output'
     folder_name = ''
@@ -110,6 +146,12 @@ def main():
             # grafico de dispersão dos pesos
             generate_weights_scatter_plot(metrics_data, epoch_qtd, learning_rate)
 
+            # grafico de separação de classes
+            generate_class_separation_charts(f'{output_folder}/ep_{epoch_qtd}_lr_{learning_rate}/10_90_test_data_result.csv', epoch_qtd, learning_rate)
+            generate_class_separation_charts(f'{output_folder}/ep_{epoch_qtd}_lr_{learning_rate}/30_70_test_data_result.csv', epoch_qtd, learning_rate)
+            generate_class_separation_charts(f'{output_folder}/ep_{epoch_qtd}_lr_{learning_rate}/50_50_test_data_result.csv', epoch_qtd, learning_rate)
+
+
     for data in best_accuracies:
         print(data)
 
@@ -118,6 +160,7 @@ def main():
 
     # grafico que mostra a acuracia por combinação de epochs e learning rate
     generate_accuracy_bar_chart_by_combination(best_accuracies)
+
 
 if __name__ == "__main__":
     main()
