@@ -74,6 +74,19 @@ def generate_accuracy_bar_chart_by_combination(data):
     plt.xticks(rotation=45)
     plt.savefig(f"accuracy_bar_chart_by_combination.png")
 
+def generate_weights_scatter_plot(metrics, epoch_qtd, learning_rate):
+    weights_data = metrics["Pesos treinados"].apply(lambda x: eval(x))
+    plt.figure(figsize=(8, 6))
+    plt.scatter(weights_data.apply(lambda x: x[0]), weights_data.apply(lambda x: x[1]), c=metrics["Acuracia"], cmap='viridis')
+    plt.xlabel("Peso 1")
+    plt.ylabel("Peso 2")
+    plt.colorbar(label="Acurácia")
+    
+    plt.title(f"Dispersão dos pesos treinados. Epochs = {epoch_qtd}, Learning Rate = {learning_rate}")
+    
+    plt.savefig(f"weights_scatter_plot_ep_{epoch_qtd}_lr_{learning_rate}.png")
+    plt.close()
+
 def main():
     output_folder = '../output'
     folder_name = ''
@@ -93,6 +106,9 @@ def main():
 
             # grafico individual de acuracia por hold-out
             best_accuracies.append(generate_individual_accuracy_bar_chart(metrics_data, epoch_qtd, learning_rate))
+
+            # grafico de dispersão dos pesos
+            generate_weights_scatter_plot(metrics_data, epoch_qtd, learning_rate)
 
     for data in best_accuracies:
         print(data)

@@ -112,19 +112,19 @@ def main():
             trained_weights_50, test_data_50, accuracy_50 = train_test_get_metrics(train_data_50, test_data_50, learning_rate, epoch_qtd)
 
             hold_out_10_results = {
-                'weights': trained_weights_10,
+                'weights': str(trained_weights_10).replace("   ", ",").replace("  ", ",").replace(" ", ","),
                 'test_data': test_data_10,
                 'accuracy': accuracy_10
             }
 
             hold_out_30_results = {
-                'weights': trained_weights_30,
+                'weights': str(trained_weights_30).replace("   ", ",").replace("  ", ",").replace(" ", ","),
                 'test_data': test_data_30,
                 'accuracy': accuracy_30
             }
 
             hold_out_50_results = {
-                'weights': trained_weights_50,
+                'weights': str(trained_weights_50).replace("   ", ",").replace("  ", ",").replace(" ", ","),
                 'test_data': test_data_50,
                 'accuracy': accuracy_50
             }
