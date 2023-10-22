@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 def step_function(x):
     if x >= 0:
@@ -8,8 +9,10 @@ def step_function(x):
         return -1
 
 def predict_perceptron(weights, x):
+    # calculando produto escalar (valor1 * peso1 + valor2 * peso2 + ...)
     z = np.dot(weights, x)
 
+    # chamando funcao de ativacao
     return step_function(z)
 
 def train_perceptron(data, learning_rate=0.1, epochs=100):
@@ -24,11 +27,7 @@ def train_perceptron(data, learning_rate=0.1, epochs=100):
             # pegando a label
             y = data.iloc[i, -1]
 
-            # calculando produto escalar (valor1 * peso1 + valor2 * peso2 + ...)
-            z = np.dot(weights, x)
-
-            # funcao de ativacao
-            predicted_class = step_function(z)
+            predicted_class = predict_perceptron(weights, x)
 
             # atualizando pesos por meio da comparação com o valor real
             error = y - predicted_class
@@ -37,6 +36,8 @@ def train_perceptron(data, learning_rate=0.1, epochs=100):
     return weights
 
 def main():
+    holdout = 0.2 # 20% dos dados para teste
+    
     # lendo dataset
     data = pd.read_csv("iris/iris.data", header=None)
 
@@ -51,11 +52,37 @@ def main():
     # embaralhando os dados do dataset 
     data = data.sample(frac=1, random_state=42).reset_index(drop=True)
     
-    # treinando perceptron
-    trained_weights = train_perceptron(data)
+    # separando dados de treino e teste (hold-out)
+    X = data.iloc[:, :-1].values
+    y = data.iloc[:, -1].values
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=holdout, random_state=42)
     
-    print('trained_weights')
+    # juntando em dataset pra continuar usando a funcao de treino
+    train_data = pd.DataFrame(np.column_stack((X_train, y_train)))
+    test_data = pd.DataFrame(np.column_stack((X_test, y_test)))
+
+    # treinando perceptron
+    trained_weights = train_perceptron(train_data)
+
+    print('pesos treinados:')
     print(trained_weights)
+
+    # testando perceptron
+    test_data['predicted_class'] = test_data.apply(lambda x: predict_perceptron(trained_weights, x[:-1]), axis=1)
+
+    # ja contando no codigo pra facilitar
+    correct_predictions = 0
+    for i in range(len(test_data)):
+        if test_data.iloc[i, -1] == test_data.iloc[i, -2]:
+            correct_predictions += 1
+
+    accuracy = correct_predictions / len(test_data)
+
+    print('test_data')
+    print(test_data)
+
+    print('acuracia:')
+    print(accuracy)
 
 if __name__ == "__main__":
   main()
